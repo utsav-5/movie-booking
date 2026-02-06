@@ -8,7 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Favorites from "./pages/Favorites";
-import Settings from "./pages/Settings";
+import Theaters from "./pages/Theaters";
 import AdminDashboard from "./pages/AdminDashboard";
 import Booking from "./pages/Booking";
 import { AuthProvider } from "./context/AuthContext";
@@ -29,7 +29,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="/theaters" element={<Settings />} />
+              <Route path="/theaters" element={<Theaters />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/book/:id" element={<Booking />} />
             </Routes>

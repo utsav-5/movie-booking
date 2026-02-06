@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -20,57 +19,47 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-8 border border-purple-500/30">
-          <h2 className="text-3xl font-bold text-white mb-6 text-center">Login</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-purple-200 mb-2">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:border-purple-400"
-                  placeholder="your@email.com"
-                />
-              </div>
-            </div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backgroundColor: '#1a1a2e' }}>
+      <div style={{ maxWidth: '400px', width: '100%', backgroundColor: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '10px', border: '1px solid rgba(128,0,128,0.3)' }}>
+        <h2 style={{ color: 'white', fontSize: '28px', textAlign: 'center', marginBottom: '20px' }}>Login</h2>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div>
+            <label style={{ color: '#ddd', display: 'block', marginBottom: '8px' }}>Email</label>
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              style={{ width: '100%', padding: '12px', borderRadius: '5px', border: '1px solid rgba(128,0,128,0.3)', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', boxSizing: 'border-box' }}
+              placeholder="your@email.com"
+            />
+          </div>
 
-            <div>
-              <label className="block text-purple-200 mb-2">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
-                <input
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:border-purple-400"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
+          <div>
+            <label style={{ color: '#ddd', display: 'block', marginBottom: '8px' }}>Password</label>
+            <input
+              type="password"
+              required
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              style={{ width: '100%', padding: '12px', borderRadius: '5px', border: '1px solid rgba(128,0,128,0.3)', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', boxSizing: 'border-box' }}
+              placeholder="Enter password"
+            />
+          </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{ width: '100%', padding: '12px', backgroundColor: '#9333ea', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', marginTop: '10px' }}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
 
-            <p className="text-center text-purple-200 text-sm">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-purple-400 hover:text-purple-300 font-semibold">
-                Register here
-              </Link>
-            </p>
-          </form>
-        </div>
+        <p style={{ color: '#ddd', textAlign: 'center', marginTop: '15px' }}>
+          Don't have an account?{' '}
+          <Link to="/register" style={{ color: '#a855f7' }}>Register here</Link>
+        </p>
       </div>
     </div>
   );
