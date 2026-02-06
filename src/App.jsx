@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Favorites from "./pages/Favorites";
+import Settings from "./pages/Settings";
 import Theaters from "./pages/Theaters";
 import AdminDashboard from "./pages/AdminDashboard";
 import Booking from "./pages/Booking";
