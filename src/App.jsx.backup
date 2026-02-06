@@ -1,0 +1,773 @@
+import React, { useState, useEffect } from 'react';
+import { Film, Calendar, Clock, User, CreditCard, Check, LogOut, Mail, Lock } from 'lucide-react';
+import { auth, db } from './config/firebase';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut,
+  onAuthStateChanged 
+} from 'firebase/auth';
+import { 
+  collection, 
+  addDoc, 
+  doc, 
+  setDoc, 
+  getDoc,
+  getDocs,
+  query,
+  where,
+  serverTimestamp 
+} from 'firebase/firestore';
+
+function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [authMode, setAuthMode] = useState('login'); // login, register
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedShowtime, setSelectedShowtime] = useState(null);
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [step, setStep] = useState('movies'); // movies, seats, checkout, confirmation
+  const [bookingDetails, setBookingDetails] = useState({
+    name: '',
+    email: '',
+    phone: ''
+  });
+  const [loginForm, setLoginForm] = useState({
+    email: '',
+    password: ''
+  });
+  const [registerForm, setRegisterForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: ''
+  });
+
+  // Listen to authentication state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setCurrentUser(user);
+        // Fetch user profile from Firestore
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          setUserProfile(userDoc.data());
+        }
+      } else {
+        setCurrentUser(null);
+        setUserProfile(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const movies = [
+    {
+      id: 1,
+      title: 'Cosmic Odyssey',
+      genre: 'Sci-Fi',
+      rating: '8.5',
+      duration: '148 min',
+      image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop',
+      showtimes: ['10:00 AM', '1:30 PM', '4:45 PM', '8:00 PM', '10:30 PM']
+    },
+    {
+      id: 2,
+      title: 'The Last Detective',
+      genre: 'Thriller',
+      rating: '7.8',
+      duration: '132 min',
+      image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=600&fit=crop',
+      showtimes: ['11:15 AM', '2:00 PM', '5:30 PM', '9:00 PM']
+    },
+    {
+      id: 3,
+      title: 'Summer Dreams',
+      genre: 'Romance',
+      rating: '7.2',
+      duration: '115 min',
+      image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop',
+      showtimes: ['12:00 PM', '3:15 PM', '6:30 PM', '9:45 PM']
+    },
+    {
+      id: 4,
+      title: 'Dragon Warriors',
+      genre: 'Action',
+      rating: '8.1',
+      duration: '156 min',
+      image: 'https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=400&h=600&fit=crop',
+      showtimes: ['10:30 AM', '2:15 PM', '5:45 PM', '9:15 PM']
+    }
+  ];
+
+  const generateSeats = () => {
+    const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const seatsPerRow = 10;
+    const bookedSeats = ['A3', 'A4', 'B5', 'C7', 'D2', 'E8', 'F4', 'F5', 'G3'];
+    
+    return rows.map(row => ({
+      row,
+      seats: Array.from({ length: seatsPerRow }, (_, i) => ({
+        id: `${row}${i + 1}`,
+        number: i + 1,
+        isBooked: bookedSeats.includes(`${row}${i + 1}`)
+      }))
+    }));
+  };
+
+  const seats = generateSeats();
+
+  const handleSeatClick = (seatId) => {
+    if (selectedSeats.includes(seatId)) {
+      setSelectedSeats(selectedSeats.filter(s => s !== seatId));
+    } else {
+      setSelectedSeats([...selectedSeats, seatId]);
+    }
+  };
+
+  const handleMovieSelect = (movie) => {
+    if (!currentUser) {
+      alert('Please login to book tickets!');
+      return;
+    }
+    setSelectedMovie(movie);
+    setStep('showtimes');
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, loginForm.email, loginForm.password);
+      setLoginForm({ email: '', password: '' });
+      alert('Login successful!');
+    } catch (error) {
+      console.error('Login error:', error);
+      alert(error.message);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    
+    if (registerForm.password !== registerForm.confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+
+    if (registerForm.password.length < 6) {
+      alert('Password must be at least 6 characters!');
+      return;
+    }
+
+    try {
+      // Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        registerForm.email, 
+        registerForm.password
+      );
+
+      // Store additional user info in Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        name: registerForm.name,
+        email: registerForm.email,
+        phone: registerForm.phone,
+        createdAt: serverTimestamp()
+      });
+
+      setRegisterForm({ name: '', email: '', password: '', confirmPassword: '', phone: '' });
+      alert('Registration successful!');
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert(error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setSelectedMovie(null);
+      setSelectedShowtime(null);
+      setSelectedSeats([]);
+      setStep('movies');
+      setBookingDetails({ name: '', email: '', phone: '' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert(error.message);
+    }
+  };
+
+  const handleShowtimeSelect = (showtime) => {
+    setSelectedShowtime(showtime);
+    setStep('seats');
+  };
+
+  const handleContinueToCheckout = () => {
+    if (selectedSeats.length > 0) {
+      setStep('checkout');
+    }
+  };
+
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    
+    try {
+      // Save booking to Firestore
+      const bookingData = {
+        userId: currentUser.uid,
+        userName: bookingDetails.name,
+        userEmail: bookingDetails.email,
+        userPhone: bookingDetails.phone,
+        movieId: selectedMovie.id,
+        movieTitle: selectedMovie.title,
+        showtime: selectedShowtime,
+        seats: selectedSeats,
+        totalPrice: selectedSeats.length * ticketPrice,
+        bookingDate: serverTimestamp(),
+        status: 'confirmed'
+      };
+
+      await addDoc(collection(db, 'bookings'), bookingData);
+      
+      setStep('confirmation');
+    } catch (error) {
+      console.error('Booking error:', error);
+      alert('Failed to complete booking. Please try again.');
+    }
+  };
+
+  const handleStartOver = () => {
+    setSelectedMovie(null);
+    setSelectedShowtime(null);
+    setSelectedSeats([]);
+    setStep('movies');
+    setBookingDetails({ name: '', email: '', phone: '' });
+  };
+
+  const ticketPrice = 12;
+  const totalPrice = selectedSeats.length * ticketPrice;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+      {/* Header */}
+      <div className="bg-black bg-opacity-30 backdrop-blur-sm border-b border-purple-500/30">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Film className="w-8 h-8 text-purple-400" />
+              <h1 className="text-3xl font-bold text-white">CineBook</h1>
+            </div>
+            
+            {currentUser ? (
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-white font-semibold">{userProfile?.name || 'User'}</div>
+                  <div className="text-purple-300 text-sm">{currentUser.email}</div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setAuthMode('login')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    authMode === 'login'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white bg-opacity-20 text-purple-200 hover:bg-opacity-30'
+                  }`}
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setAuthMode('register')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    authMode === 'register'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white bg-opacity-20 text-purple-200 hover:bg-opacity-30'
+                  }`}
+                >
+                  Register
+                </button>
+              </div>
+            )}
+          </div>
+          {step !== 'movies' && currentUser && (
+            <button
+              onClick={handleStartOver}
+              className="mt-3 text-purple-300 hover:text-purple-200 text-sm flex items-center gap-1"
+            >
+              ← Back to Movies
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-white text-xl">Loading...</div>
+          </div>
+        ) : (
+          <>
+        {/* Login/Register Forms */}
+        {!currentUser && (
+          <div className="max-w-md mx-auto">
+            {authMode === 'login' ? (
+              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-8 border border-purple-500/30">
+                <h2 className="text-3xl font-bold text-white mb-6 text-center">Login</h2>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className="block text-purple-200 mb-2">Email</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
+                      <input
+                        type="email"
+                        required
+                        value={loginForm.email}
+                        onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                        className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300"
+                        placeholder="your@email.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-purple-200 mb-2">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
+                      <input
+                        type="password"
+                        required
+                        value={loginForm.password}
+                        onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                        className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold transition-colors"
+                  >
+                    Login
+                  </button>
+
+                  <p className="text-center text-purple-200 text-sm">
+                    Don't have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setAuthMode('register')}
+                      className="text-purple-400 hover:text-purple-300 font-semibold"
+                    >
+                      Register here
+                    </button>
+                  </p>
+                </form>
+              </div>
+            ) : (
+              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-8 border border-purple-500/30">
+                <h2 className="text-3xl font-bold text-white mb-6 text-center">Register</h2>
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div>
+                    <label className="block text-purple-200 mb-2">Full Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
+                      <input
+                        type="text"
+                        required
+                        value={registerForm.name}
+                        onChange={(e) => setRegisterForm({...registerForm, name: e.target.value})}
+                        className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-purple-200 mb-2">Email</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
+                      <input
+                        type="email"
+                        required
+                        value={registerForm.email}
+                        onChange={(e) => setRegisterForm({...registerForm, email: e.target.value})}
+                        className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300"
+                        placeholder="your@email.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-purple-200 mb-2">Phone</label>
+                    <input
+                      type="tel"
+                      required
+                      value={registerForm.phone}
+                      onChange={(e) => setRegisterForm({...registerForm, phone: e.target.value})}
+                      className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-purple-300"
+                      placeholder="+1 234 567 8900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-purple-200 mb-2">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
+                      <input
+                        type="password"
+                        required
+                        value={registerForm.password}
+                        onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
+                        className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-purple-200 mb-2">Confirm Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
+                      <input
+                        type="password"
+                        required
+                        value={registerForm.confirmPassword}
+                        onChange={(e) => setRegisterForm({...registerForm, confirmPassword: e.target.value})}
+                        className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold transition-colors"
+                  >
+                    Register
+                  </button>
+
+                  <p className="text-center text-purple-200 text-sm">
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setAuthMode('login')}
+                      className="text-purple-400 hover:text-purple-300 font-semibold"
+                    >
+                      Login here
+                    </button>
+                  </p>
+                </form>
+              </div>
+            )}
+          </div>
+        )}
+        {/* Movie Selection */}
+        {currentUser && step === 'movies' && (
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-6">Now Showing</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {movies.map(movie => (
+                <div
+                  key={movie.id}
+                  className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl overflow-hidden border border-purple-500/30 hover:border-purple-400/60 transition-all cursor-pointer transform hover:scale-105"
+                  onClick={() => handleMovieSelect(movie)}
+                >
+                  <div className="relative h-80">
+                    <img
+                      src={movie.image}
+                      alt={movie.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-3 right-3 bg-yellow-500 text-black px-3 py-1 rounded-full font-bold text-sm">
+                      ⭐ {movie.rating}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-xl font-bold text-white mb-2">{movie.title}</h3>
+                    <div className="flex items-center gap-4 text-purple-200 text-sm">
+                      <span className="bg-purple-500/30 px-2 py-1 rounded">{movie.genre}</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {movie.duration}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Showtime Selection */}
+        {currentUser && step === 'showtimes' && selectedMovie && (
+          <div>
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-purple-500/30 mb-6">
+              <div className="flex gap-6">
+                <img
+                  src={selectedMovie.image}
+                  alt={selectedMovie.title}
+                  className="w-32 h-48 object-cover rounded-lg"
+                />
+                <div>
+                  <h2 className="text-3xl font-bold text-white mb-2">{selectedMovie.title}</h2>
+                  <div className="flex items-center gap-4 text-purple-200 mb-4">
+                    <span className="bg-purple-500/30 px-3 py-1 rounded">{selectedMovie.genre}</span>
+                    <span>{selectedMovie.duration}</span>
+                    <span className="text-yellow-400">⭐ {selectedMovie.rating}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+              <Calendar className="w-6 h-6" />
+              Select Showtime
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {selectedMovie.showtimes.map((time, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleShowtimeSelect(time)}
+                  className="bg-white bg-opacity-10 backdrop-blur-lg border border-purple-500/30 hover:border-purple-400 hover:bg-opacity-20 text-white p-4 rounded-lg transition-all text-lg font-semibold"
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Seat Selection */}
+        {currentUser && step === 'seats' && (
+          <div>
+            <div className="mb-8 text-center">
+              <div className="inline-block bg-white bg-opacity-10 backdrop-blur-lg rounded-xl px-6 py-3 border border-purple-500/30">
+                <h3 className="text-xl font-bold text-white">
+                  {selectedMovie.title} • {selectedShowtime}
+                </h3>
+              </div>
+            </div>
+
+            {/* Screen */}
+            <div className="mb-12">
+              <div className="bg-gradient-to-b from-purple-400/50 to-transparent h-2 rounded-t-full mx-auto max-w-2xl"></div>
+              <div className="text-center text-purple-300 text-sm mt-2">SCREEN</div>
+            </div>
+
+            {/* Seats Grid */}
+            <div className="max-w-4xl mx-auto mb-8">
+              {seats.map(({ row, seats: rowSeats }) => (
+                <div key={row} className="flex items-center justify-center gap-2 mb-3">
+                  <div className="w-8 text-purple-300 font-bold text-center">{row}</div>
+                  <div className="flex gap-2">
+                    {rowSeats.map(seat => (
+                      <button
+                        key={seat.id}
+                        onClick={() => !seat.isBooked && handleSeatClick(seat.id)}
+                        disabled={seat.isBooked}
+                        className={`w-10 h-10 rounded-t-lg transition-all ${
+                          seat.isBooked
+                            ? 'bg-gray-600 cursor-not-allowed'
+                            : selectedSeats.includes(seat.id)
+                            ? 'bg-purple-500 text-white'
+                            : 'bg-white bg-opacity-20 hover:bg-purple-400 text-purple-200'
+                        }`}
+                      >
+                        {seat.number}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Legend */}
+            <div className="flex justify-center gap-8 mb-8">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-white bg-opacity-20 rounded-t-lg"></div>
+                <span className="text-purple-200">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-purple-500 rounded-t-lg"></div>
+                <span className="text-purple-200">Selected</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gray-600 rounded-t-lg"></div>
+                <span className="text-purple-200">Booked</span>
+              </div>
+            </div>
+
+            {/* Summary */}
+            {selectedSeats.length > 0 && (
+              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-purple-500/30 max-w-md mx-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-purple-200">Selected Seats:</span>
+                  <span className="text-white font-bold">{selectedSeats.join(', ')}</span>
+                </div>
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-purple-200">Tickets ({selectedSeats.length}):</span>
+                  <span className="text-white font-bold">${totalPrice}</span>
+                </div>
+                <button
+                  onClick={handleContinueToCheckout}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold transition-colors"
+                >
+                  Continue to Checkout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Checkout */}
+        {currentUser && step === 'checkout' && (
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-white mb-6">Checkout</h2>
+            
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-purple-500/30 mb-6">
+              <h3 className="text-xl font-bold text-white mb-4">Booking Summary</h3>
+              <div className="space-y-2 text-purple-200">
+                <div className="flex justify-between">
+                  <span>Movie:</span>
+                  <span className="text-white font-semibold">{selectedMovie.title}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Showtime:</span>
+                  <span className="text-white font-semibold">{selectedShowtime}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Seats:</span>
+                  <span className="text-white font-semibold">{selectedSeats.join(', ')}</span>
+                </div>
+                <div className="border-t border-purple-500/30 pt-2 mt-2 flex justify-between text-lg">
+                  <span className="font-bold">Total:</span>
+                  <span className="text-white font-bold">${totalPrice}</span>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleBooking} className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-purple-500/30">
+              <h3 className="text-xl font-bold text-white mb-4">Your Details</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-purple-200 mb-2">Full Name</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 w-5 h-5 text-purple-400" />
+                    <input
+                      type="text"
+                      required
+                      value={bookingDetails.name}
+                      onChange={(e) => setBookingDetails({...bookingDetails, name: e.target.value})}
+                      className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg pl-12 pr-4 py-3 text-white placeholder-purple-300"
+                      placeholder="John Doe"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-purple-200 mb-2">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={bookingDetails.email}
+                    onChange={(e) => setBookingDetails({...bookingDetails, email: e.target.value})}
+                    className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-purple-300"
+                    placeholder="john@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-purple-200 mb-2">Phone</label>
+                  <input
+                    type="tel"
+                    required
+                    value={bookingDetails.phone}
+                    onChange={(e) => setBookingDetails({...bookingDetails, phone: e.target.value})}
+                    className="w-full bg-white bg-opacity-20 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-purple-300"
+                    placeholder="+1 234 567 8900"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 mt-6"
+                >
+                  <CreditCard className="w-5 h-5" />
+                  Complete Booking (${totalPrice})
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Confirmation */}
+        {currentUser && step === 'confirmation' && (
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-8 border border-purple-500/30">
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Check className="w-12 h-12 text-white" />
+              </div>
+              
+              <h2 className="text-3xl font-bold text-white mb-4">Booking Confirmed!</h2>
+              <p className="text-purple-200 mb-8">
+                Your tickets have been sent to {bookingDetails.email}
+              </p>
+
+              <div className="bg-white bg-opacity-20 rounded-lg p-6 mb-6 text-left">
+                <h3 className="text-xl font-bold text-white mb-4">Booking Details</h3>
+                <div className="space-y-3 text-purple-200">
+                  <div className="flex justify-between">
+                    <span>Movie:</span>
+                    <span className="text-white font-semibold">{selectedMovie.title}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Showtime:</span>
+                    <span className="text-white font-semibold">{selectedShowtime}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Seats:</span>
+                    <span className="text-white font-semibold">{selectedSeats.join(', ')}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Name:</span>
+                    <span className="text-white font-semibold">{bookingDetails.name}</span>
+                  </div>
+                  <div className="border-t border-purple-500/30 pt-3 mt-3 flex justify-between text-lg">
+                    <span className="font-bold">Total Paid:</span>
+                    <span className="text-white font-bold">${totalPrice}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleStartOver}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-bold transition-colors"
+              >
+                Book Another Movie
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+        </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;

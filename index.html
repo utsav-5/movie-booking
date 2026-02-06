@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineBook - Movie Booking</title>
+  </head>
+  <body>
+    <div id="root"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#1a1a2e;color:#fff;font-family:system-ui,sans-serif;"><div style="width:50px;height:50px;border:4px solid #e94560;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;"></div><p style="margin-top:20px;">Loading CineBook...</p></div></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      window.addEventListener('error', function(e) {
+        document.getElementById('root').innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#1a1a2e;color:#fff;font-family:system-ui,sans-serif;padding:20px;text-align:center;"><h1>Something went wrong</h1><div style="background:#e94560;padding:20px;border-radius:8px;margin-top:20px;"><strong>Error:</strong>' + (e.message || 'Unknown error') + '<br><br><strong>File:</strong>' + (e.filename || 'Unknown') + '<br><br>Check console (F12) for details.</div></div>';
+      });
+    </script>
+  </body>
+</html>
