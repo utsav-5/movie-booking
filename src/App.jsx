@@ -1,6 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import MovieDetail from "./pages/MovieDetail";
@@ -24,6 +23,8 @@ function App() {
             <Navbar />
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/movies" element={<Navigate to="/" replace />} />
+              <Route path="/bookings" element={<Navigate to="/profile" replace />} />
               <Route path="/movie/:id" element={<MovieDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -34,28 +35,6 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/book/:id" element={<Booking />} />
             </Routes>
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 3000,
-                style: {
-                  background: "#363636",
-                  color: "#fff",
-                },
-                success: {
-                  iconTheme: {
-                    primary: "#10B981",
-                    secondary: "#fff",
-                  },
-                },
-                error: {
-                  iconTheme: {
-                    primary: "#EF4444",
-                    secondary: "#fff",
-                  },
-                },
-              }}
-            />
           </div>
         </Router>
       </BookingProvider>

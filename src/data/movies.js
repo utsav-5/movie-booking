@@ -131,6 +131,7 @@ export const MOVIES = [
   {
     id: "movie_1",
     title: "Inception",
+    year: 2010,
     genre: ["Sci-Fi", "Thriller"],
     rating: 8.8,
     synopsis: "A thief who enters dream worlds to steal secrets from the subconscious is given a chance to erase his criminal past by planting an idea in a corporate heir's mind.",
@@ -144,6 +145,7 @@ export const MOVIES = [
   {
     id: "movie_2",
     title: "The Dark Knight",
+    year: 2008,
     genre: ["Action", "Drama"],
     rating: 9.0,
     synopsis: "Batman raises the stakes in his war on crime against the Joker, a criminal mastermind who seeks to test Batman in a game of cat and mouse.",
@@ -157,6 +159,7 @@ export const MOVIES = [
   {
     id: "movie_3",
     title: "Interstellar",
+    year: 2014,
     genre: ["Sci-Fi", "Adventure"],
     rating: 8.6,
     synopsis: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival as Earth becomes increasingly uninhabitable.",
@@ -170,6 +173,7 @@ export const MOVIES = [
   {
     id: "movie_4",
     title: "Avengers: Endgame",
+    year: 2019,
     genre: ["Action", "Sci-Fi"],
     rating: 8.4,
     synopsis: "The Avengers assemble one last time to reverse Thanos' actions and restore balance to the universe after the devastating events of Infinity War.",
@@ -183,6 +187,7 @@ export const MOVIES = [
   {
     id: "movie_5",
     title: "Parasite",
+    year: 2019,
     genre: ["Thriller", "Drama"],
     rating: 8.5,
     synopsis: "A poor family schemes to become employed by a wealthy family by infiltrating their household, but things take an unexpected turn.",
@@ -196,6 +201,7 @@ export const MOVIES = [
   {
     id: "movie_6",
     title: "Joker",
+    year: 2019,
     genre: ["Crime", "Drama"],
     rating: 8.4,
     synopsis: "A troubled mental health support worker descends into madness, becoming the archcriminal known only as The Joker.",
@@ -209,6 +215,7 @@ export const MOVIES = [
   {
     id: "movie_7",
     title: "Dune",
+    year: 2021,
     genre: ["Sci-Fi", "Adventure"],
     rating: 8.1,
     synopsis: "A noble family becomesembroiled in a war for control over the galaxy's most valuable asset while its heir becomes swept up in a rebellion.",
@@ -222,6 +229,7 @@ export const MOVIES = [
   {
     id: "movie_8",
     title: "The Matrix",
+    year: 1999,
     genre: ["Sci-Fi", "Action"],
     rating: 8.7,
     synopsis: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
@@ -235,6 +243,7 @@ export const MOVIES = [
   {
     id: "movie_9",
     title: "Titanic",
+    year: 1997,
     genre: ["Romance", "Drama"],
     rating: 7.9,
     synopsis: "A love story aboard the RMS Titanic during its ill-fated maiden voyage, spanning different social classes during a time of great upheaval.",
@@ -248,6 +257,7 @@ export const MOVIES = [
   {
     id: "movie_10",
     title: "Oppenheimer",
+    year: 2023,
     genre: ["Drama", "History"],
     rating: 8.9,
     synopsis: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II.",

@@ -135,7 +135,7 @@ const MovieDetail = () => {
   const theatreShows = selectedTheatre ? movie.shows?.[selectedTheatre.id] || {} : {};
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900">
       {/* Hero Section */}
       <div className="relative h-[70vh] min-h-[500px] overflow-hidden">
         <div className="absolute inset-0">
@@ -144,7 +144,7 @@ const MovieDetail = () => {
             alt={movie.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent dark:from-dark-950" />
         </div>
 
         {/* Back Button */}
@@ -239,24 +239,24 @@ const MovieDetail = () => {
           {/* Left Column - Details & Reviews */}
           <div className="lg:col-span-2 space-y-8">
             {/* Cast */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Cast</h3>
+            <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Cast</h3>
               <div className="flex flex-wrap gap-4">
                 {movie.cast?.map((actor, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-full px-4 py-2">
+                  <div key={i} className="flex items-center gap-3 bg-gray-50 dark:bg-dark-700 rounded-full px-4 py-2">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-medium">
                       {actor.charAt(0)}
                     </div>
-                    <span className="text-gray-700">{actor}</span>
+                    <span className="text-gray-700 dark:text-gray-300">{actor}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Reviews */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Reviews ({reviews.length})</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Reviews ({reviews.length})</h3>
                 <button
                   onClick={() => setShowReviewForm(!showReviewForm)}
                   className="px-4 py-2 bg-purple-600 text-white rounded-full text-sm hover:bg-purple-700 transition-colors"
@@ -272,17 +272,17 @@ const MovieDetail = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="mb-6 p-4 bg-gray-50 rounded-xl overflow-hidden"
+                    className="mb-6 p-4 bg-gray-50 dark:bg-dark-700 rounded-xl overflow-hidden"
                   >
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-gray-700">Your Rating:</span>
+                      <span className="text-gray-700 dark:text-gray-300">Your Rating:</span>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           onClick={() => setNewRating(star)}
                           className="text-2xl transition-colors"
                         >
-                          <FiStar className={star <= newRating ? "text-yellow-400 fill-current" : "text-gray-300"} />
+                          <FiStar className={star <= newRating ? "text-yellow-400 fill-current" : "text-gray-300 dark:text-gray-600"} />
                         </button>
                       ))}
                     </div>
@@ -290,13 +290,13 @@ const MovieDetail = () => {
                       value={newReview}
                       onChange={(e) => setNewReview(e.target.value)}
                       placeholder="Share your thoughts..."
-                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-dark-800 text-gray-900 dark:text-white"
                       rows={3}
                     />
                     <div className="flex justify-end gap-3 mt-3">
                       <button
                         onClick={() => setShowReviewForm(false)}
-                        className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-full"
+                        className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-600 rounded-full"
                       >
                         Cancel
                       </button>
@@ -314,10 +314,10 @@ const MovieDetail = () => {
               {/* Reviews List */}
               <div className="space-y-4">
                 {reviews.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No reviews yet. Be the first to review!</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">No reviews yet. Be the first to review!</p>
                 ) : (
                   reviews.map((review) => (
-                    <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0">
+                    <div key={review.id} className="border-b border-gray-100 dark:border-gray-700 pb-4 last:border-0">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
@@ -346,8 +346,8 @@ const MovieDetail = () => {
           {/* Right Column - Booking */}
           <div className="space-y-6">
             {/* Theatre Selection */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Select Theatre</h3>
+            <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Select Theatre</h3>
               <div className="space-y-3">
                 {THEATRES.map((theatre) => (
                   <button
@@ -359,17 +359,17 @@ const MovieDetail = () => {
                     }}
                     className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
                       selectedTheatre?.id === theatre.id
-                        ? "border-purple-500 bg-purple-50"
-                        : "border-gray-200 hover:border-purple-300"
+                        ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+                        : "border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <FiMapPin className="text-purple-600" />
+                      <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                        <FiMapPin className="text-purple-600 dark:text-purple-400" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{theatre.name}</p>
-                        <p className="text-sm text-gray-500">{theatre.location}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{theatre.name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{theatre.location}</p>
                       </div>
                     </div>
                   </button>
@@ -379,8 +379,8 @@ const MovieDetail = () => {
 
             {/* Date Selection */}
             {selectedTheatre && (
-              <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Select Date</h3>
+              <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Select Date</h3>
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {dates.map((date, i) => {
                     const dateStr = date.toISOString().split("T")[0];
@@ -394,12 +394,12 @@ const MovieDetail = () => {
                         }}
                         className={`flex-shrink-0 w-16 py-3 rounded-xl border-2 text-center transition-all ${
                           isSelected
-                            ? "border-purple-500 bg-purple-50"
-                            : "border-gray-200 hover:border-purple-300"
+                            ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+                            : "border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
                         }`}
                       >
-                        <p className="text-xs text-gray-500">{date.toLocaleDateString("en-US", { weekday: "short" })}</p>
-                        <p className="font-bold text-gray-900">{date.getDate()}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{date.toLocaleDateString("en-US", { weekday: "short" })}</p>
+                        <p className="font-bold text-gray-900 dark:text-white">{date.getDate()}</p>
                       </button>
                     );
                   })}
@@ -409,8 +409,8 @@ const MovieDetail = () => {
 
             {/* Time Selection */}
             {selectedDate && (
-              <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Select Time</h3>
+              <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Select Time</h3>
                 <div className="grid grid-cols-3 gap-2">
                   {getShowTimes(movie.id, selectedTheatre.id, selectedDate).map((time, i) => (
                     <button
@@ -418,8 +418,8 @@ const MovieDetail = () => {
                       onClick={() => setSelectedTime(time)}
                       className={`py-3 rounded-xl border-2 font-medium transition-all ${
                         selectedTime === time
-                          ? "border-purple-500 bg-purple-50 text-purple-600"
-                          : "border-gray-200 hover:border-purple-300"
+                          ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"
+                          : "border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 text-gray-900 dark:text-white"
                       }`}
                     >
                       {time}
